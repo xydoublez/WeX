@@ -36,7 +36,7 @@ namespace WexOne.Web.Controllers
                 OriginalXml = message,
                 MsgType=requestMsg.MsgType.ToString()
             };
-            await _eventLogService.CreateEventLog(eventLog);
+            _eventLogService.CreateEventLog(eventLog);
             if (requestMsg is WeChatRequestTextMessage)
             {
                 //处理文本输入
@@ -47,25 +47,33 @@ namespace WexOne.Web.Controllers
                 msg.FromUserName = request.ToUserName;
                 msg.ToUserName = request.FromUserName;
                 msg.CreateTime = DateTimeHelper.NowForWeChat;
-                msg.Content = "Hello World powered by Neuzilla Wex framework";
+                msg.Content = "Hello World powered by Neuzilla Wex framework"+WeChatEmotions.GetEmotion(WeChatEmotionType.Smile).SymbolCode;
 
                 return Content(msg.ToXml());
             }
-            return Content("Error 200::unknown error");
+            else
+            {
+                var msg = new WeChatResponseTextMessage();
+                msg.FromUserName = requestMsg.ToUserName;
+                msg.ToUserName = requestMsg.FromUserName;
+                msg.CreateTime = DateTimeHelper.NowForWeChat;
+                msg.Content = "主人，我听不懂你在说什么"+WeChatEmotions.GetEmotion(WeChatEmotionType.Swear).SymbolCode;
+
+                return Content(msg.ToXml());
+            }
         }
-        //测试号
         public override string AppId
         {
-            get { return "<your appid>"; }
+            get { return ConfigurationManager.AppSettings["AppId"]; }
         }
 
         public override string AppSecret
         {
-            get { return "<your app serect>"; }
+            get { return ConfigurationManager.AppSettings["AppSecret"]; }
         }
         public override string EncodingAESKey
         {
-            get { return "<your aes key>"; }
+            get { return ConfigurationManager.AppSettings["EncodingAESKey"]; }
         }
     }
 }
